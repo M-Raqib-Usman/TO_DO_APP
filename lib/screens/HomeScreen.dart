@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => TodoScreen()),
                 );
               },
-              child: Text('Go to To-Do List'),
+              child: Text('To-Do List'),
             ),
           ],
         ),
