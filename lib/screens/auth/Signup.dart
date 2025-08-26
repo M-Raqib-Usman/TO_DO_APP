@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/screens/HomeScreen.dart';
+import 'package:to_do/screens/auth/Login.dart';
 import 'package:to_do/screens/todo_screen.dart';
 
 // The login screen widget
-class LoginScreen extends StatefulWidget {
+class SignupScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _SignupScreenState createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   // Key to track the form's state
   final _formKey = GlobalKey<FormState>();
   // Controllers to track text input
@@ -42,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login', style: TextStyle(color: Color(0xFFF3EDE3))),
+        title: Text('SignUp', style: TextStyle(color: Color(0xFFF3EDE3))),
         backgroundColor: appBarColor,
       ),
       backgroundColor: Color(0xFF45644A), // Screen background color
@@ -73,21 +74,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Email',
                     labelStyle: TextStyle(color: appBarColor),
+                    prefixIcon:Icon(Icons.email_outlined),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
-                            _emailController.text.isEmpty
-                                ? Colors
-                                    .grey // Default color when empty
-                                : appBarColor, // AppBar color when filled
+                        _emailController.text.isEmpty
+                            ? Colors
+                            .grey // Default color when empty
+                            : appBarColor, // AppBar color when filled
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
-                            _emailController.text.isEmpty
-                                ? Colors.grey
-                                : appBarColor,
+                        _emailController.text.isEmpty
+                            ? Colors.grey
+                            : appBarColor,
                       ),
                     ),
                   ),
@@ -110,21 +112,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: TextStyle(color: appBarColor),
+                    prefixIcon:Icon(Icons.lock_open),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
-                            _passwordController.text.isEmpty
-                                ? Colors
-                                    .grey // Default color when empty
-                                : appBarColor, // AppBar color when filled
+                        _passwordController.text.isEmpty
+                            ? Colors
+                            .grey // Default color when empty
+                            : appBarColor, // AppBar color when filled
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
-                            _passwordController.text.isEmpty
-                                ? Colors.grey
-                                : appBarColor,
+                        _passwordController.text.isEmpty
+                            ? Colors.grey
+                            : appBarColor,
                       ),
                     ),
                   ),
@@ -150,28 +153,33 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Navigate to TodoScreen
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
                       );
                     }
                   },
                   child: Text(
-                    'Login',
+                    'Sign Up',
                     style: TextStyle(fontSize: 16, color: Color(0xFFF3EDE3)),
                   ),
                 ),
                 // Forgot Password text
-                TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.transparent, // Match container
-                  ),
-                  onPressed: () {
-                    // Placeholder action for Forgot Password
-                    print('Forgot Password clicked');
-                  },
-                  child: Text(
-                    'Forgot Password?',
-                    style: TextStyle(color: Color(0xFF45644A)),
-                  ),
+                Row(
+                  children: [
+                    Text('Already have an account'),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.transparent, // Match container
+                      ),
+                      onPressed: () {
+                        // Placeholder action for Forgot Password
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
+                      },
+                      child: Text(
+                        'Login',
+                        style: TextStyle(color: Color(0xFF45644A)),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
