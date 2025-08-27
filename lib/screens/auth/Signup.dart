@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:to_do/screens/HomeScreen.dart';
 import 'package:to_do/screens/auth/Login.dart';
 import 'package:to_do/screens/todo_screen.dart';
+import 'package:to_do/utils/utils.dart';
 
 // The login screen widget
 class SignupScreen extends StatefulWidget {
@@ -15,6 +17,7 @@ class _SignupScreenState extends State<SignupScreen> {
   // Controllers to track text input
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -74,22 +77,22 @@ class _SignupScreenState extends State<SignupScreen> {
                   decoration: InputDecoration(
                     labelText: 'Email',
                     labelStyle: TextStyle(color: appBarColor),
-                    prefixIcon:Icon(Icons.email_outlined),
+                    prefixIcon: Icon(Icons.email_outlined),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
-                        _emailController.text.isEmpty
-                            ? Colors
-                            .grey // Default color when empty
-                            : appBarColor, // AppBar color when filled
+                            _emailController.text.isEmpty
+                                ? Colors
+                                    .grey // Default color when empty
+                                : appBarColor, // AppBar color when filled
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
-                        _emailController.text.isEmpty
-                            ? Colors.grey
-                            : appBarColor,
+                            _emailController.text.isEmpty
+                                ? Colors.grey
+                                : appBarColor,
                       ),
                     ),
                   ),
@@ -112,22 +115,22 @@ class _SignupScreenState extends State<SignupScreen> {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: TextStyle(color: appBarColor),
-                    prefixIcon:Icon(Icons.lock_open),
+                    prefixIcon: Icon(Icons.lock_open),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
-                        _passwordController.text.isEmpty
-                            ? Colors
-                            .grey // Default color when empty
-                            : appBarColor, // AppBar color when filled
+                            _passwordController.text.isEmpty
+                                ? Colors
+                                    .grey // Default color when empty
+                                : appBarColor, // AppBar color when filled
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
-                        _passwordController.text.isEmpty
-                            ? Colors.grey
-                            : appBarColor,
+                            _passwordController.text.isEmpty
+                                ? Colors.grey
+                                : appBarColor,
                       ),
                     ),
                   ),
@@ -150,11 +153,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   onPressed: () {
                     // Check if form is valid
                     if (_formKey.currentState!.validate()) {
-                      // Navigate to TodoScreen
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
-                      );
+                      _auth.createUserWithEmailAndPassword(
+                        email: _emailController.text.toString(),
+                        password: _passwordController.text.toString()).then((value){
+                        
+                      }).onError((error,stackTrace){
+                        Utils().toastmessage(error.toString());
+                      });
+                      
                     }
                   },
                   child: Text(
@@ -172,7 +178,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       onPressed: () {
                         // Placeholder action for Forgot Password
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ),
+                        );
                       },
                       child: Text(
                         'Login',
