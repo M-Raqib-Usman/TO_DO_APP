@@ -160,7 +160,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       }).onError((error,stackTrace){
                         Utils().toastmessage(error.toString());
                       });
-                      
+
                     }
                   },
                   child: Text(

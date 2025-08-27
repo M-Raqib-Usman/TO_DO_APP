@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:to_do/screens/HomeScreen.dart';
 import 'package:to_do/screens/auth/Signup.dart';
 import 'package:to_do/screens/todo_screen.dart';
+import 'package:to_do/utils/utils.dart';
 
 // The login screen widget
 class LoginScreen extends StatefulWidget {
@@ -16,25 +18,41 @@ class _LoginScreenState extends State<LoginScreen> {
   // Controllers to track text input
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
+  final _auth = FirebaseAuth.instance;
   @override
-  void initState() {
-    super.initState();
-    // Listen for text changes to update border color
-    _emailController.addListener(() {
-      setState(() {}); // Rebuild UI when email text changes
-    });
-    _passwordController.addListener(() {
-      setState(() {}); // Rebuild UI when password text changes
-    });
-  }
-
+  // void initState() {
+  //   super.initState();
+  //   // Listen for text changes to update border color
+  //   _emailController.addListener(() {
+  //     setState(() {}); // Rebuild UI when email text changes
+  //   });
+  //   _passwordController.addListener(() {
+  //     setState(() {}); // Rebuild UI when password text changes
+  //   });
+  // }
   @override
   void dispose() {
     // Clean up controllers to avoid memory leaks
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void login() {
+    _auth
+        .signInWithEmailAndPassword(
+          email: _emailController.text.toString(),
+          password: _passwordController.text.toString(),
+        )
+        .then((value) {
+          Utils().toastmessage(value.user!.email.toString());
+    })
+        .onError((error, stackTrace) {
+          Utils().toastmessage(error.toString());
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => HomeScreen())
+          );
+        });
   }
 
   @override
@@ -159,11 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       // Check if form is valid
                       if (_formKey.currentState!.validate()) {
-                        // Navigate to TodoScreen
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => HomeScreen()),
-                        );
+                        login();
                       }
                     },
                     child: Text(
