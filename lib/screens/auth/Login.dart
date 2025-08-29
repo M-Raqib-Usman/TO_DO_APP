@@ -20,16 +20,16 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
   @override
-  // void initState() {
-  //   super.initState();
-  //   // Listen for text changes to update border color
-  //   _emailController.addListener(() {
-  //     setState(() {}); // Rebuild UI when email text changes
-  //   });
-  //   _passwordController.addListener(() {
-  //     setState(() {}); // Rebuild UI when password text changes
-  //   });
-  // }
+  void initState() {
+    super.initState();
+    // Listen for text changes to update border color
+    _emailController.addListener(() {
+      setState(() {}); // Rebuild UI when email text changes
+    });
+    _passwordController.addListener(() {
+      setState(() {}); // Rebuild UI when password text changes
+    });
+  }
   @override
   void dispose() {
     // Clean up controllers to avoid memory leaks

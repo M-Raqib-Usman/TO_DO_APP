@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/screens/counter_screen.dart';
 import 'package:to_do/screens/todo_screen.dart';
+import 'package:to_do/screens/user_profile_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -42,6 +43,20 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: Text('Go to To-Do List'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF18442A),
+                foregroundColor: Color(0xFFF3EDE3),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserProfileScreen(userId: 1)),
+                );
+              },
+              child: Text('Go to User Profile'),
             ),
           ],
         ),
