@@ -53,7 +53,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserProfileScreen(userId: 1)),
+                  MaterialPageRoute(builder: (context) => UserProfileScreen(userId: 7)),
                 );
               },
               child: Text('Go to User Profile'),

@@ -1,173 +1,177 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/todo.dart';
-import '../services/api_service.dart';
-import 'user_profile_screen.dart';
+
+class Task {
+String title;
+bool isCompleted;
+
+Task({required this.title, this.isCompleted = false});
+
+// Convert Task to JSON
+Map<String, dynamic> toJson() => {
+'title': title,
+'isCompleted': isCompleted,
+};
+
+// Create Task from JSON
+factory Task.fromJson(Map<String, dynamic> json) => Task(
+title: json['title'],
+isCompleted: json['isCompleted'],
+);
+}
 
 class TodoScreen extends StatefulWidget {
-  const TodoScreen({super.key});
-
-  @override
-  _TodoScreenState createState() => _TodoScreenState();
+@override
+_TodoScreenState createState() => _TodoScreenState();
 }
 
 class _TodoScreenState extends State<TodoScreen> {
-  final _taskController = TextEditingController();
-  late Future<List<Todo>> futureTodos;
+final _taskController = TextEditingController();
+List<Task> _tasks = [];
 
-  @override
-  void initState() {
-    super.initState();
-    futureTodos = ApiService().fetchTodos();
-    _taskController.addListener(() {
-      setState(() {});
-    });
-  }
+@override
+void initState() {
+super.initState();
+_loadTasks();
+// Listen for text changes to update border color
+_taskController.addListener(() {
+setState(() {}); // Rebuild UI when text changes
+});
+}
 
-  // Add a new task (using API or local storage)
-  Future<void> _addTask(String title) async {
-    if (title.isNotEmpty) {
-      try {
-        // Use API to add task (userId: 1 for testing)
-        final newTodo = await ApiService().addTodo(title, 1);
-        setState(() {
-          futureTodos = ApiService().fetchTodos(); // Refresh tasks
-          _taskController.clear();
-        });
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add task: $e')),
-        );
-      }
-    }
-  }
+// Load tasks from SharedPreferences
+Future<void> _loadTasks() async {
+final prefs = await SharedPreferences.getInstance();
+final taskList = prefs.getStringList('tasks') ?? [];
+setState(() {
+_tasks = taskList
+    .map((taskJson) => Task.fromJson(jsonDecode(taskJson)))
+    .toList();
+});
+}
 
-  // Show dialog to add a task
-  void _showAddTaskDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Task'),
-          content: TextField(
-            controller: _taskController,
-            decoration: const InputDecoration(
-              labelText: 'Task',
-              border: OutlineInputBorder(),
-              labelStyle: TextStyle(color: Color(0xFF18442A)),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Color(0xFF18442A))),
-            ),
-            TextButton(
-              onPressed: () {
-                _addTask(_taskController.text);
-                Navigator.pop(context);
-              },
-              child: const Text('Add', style: TextStyle(color: Color(0xFF18442A))),
-            ),
-          ],
-        );
-      },
-    );
-  }
+// Save tasks to SharedPreferences
+Future<void> _saveTasks() async {
+final prefs = await SharedPreferences.getInstance();
+final taskList = _tasks.map((task) => jsonEncode(task.toJson())).toList();
+await prefs.setStringList('tasks', taskList);
+}
 
-  @override
-  void dispose() {
-    _taskController.dispose();
-    super.dispose();
-  }
+// Add a new task
+void _addTask(String title) {
+if (title.isNotEmpty) {
+setState(() {
+_tasks.add(Task(title: title));
+_taskController.clear();
+});
+_saveTasks();
+}
+}
 
-  @override
-  Widget build(BuildContext context) {
-    const appBarColor = Color(0xFF18442A);
+// Toggle task completion
+void _toggleTask(int index) {
+setState(() {
+_tasks[index].isCompleted = !_tasks[index].isCompleted;
+});
+_saveTasks();
+}
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Task Manager', style: TextStyle(color: Color(0xFFF3EDE3))),
-        backgroundColor: appBarColor,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add, color: Color(0xFFF3EDE3)),
-            onPressed: _showAddTaskDialog,
-          ),
-        ],
-      ),
-      backgroundColor: const Color(0xFF45644A),
-      body: FutureBuilder<List<Todo>>(
-        future: futureTodos,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFFF3EDE3)));
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Error: ${snapshot.error}',
-                    style: const TextStyle(color: Color(0xFFF3EDE3), fontSize: 18),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: appBarColor,
-                      foregroundColor: const Color(0xFFF3EDE3),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        futureTodos = ApiService().fetchTodos(); // Retry
-                      });
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text(
-                'No tasks yet!',
-                style: TextStyle(color: Color(0xFFF3EDE3), fontSize: 18),
-              ),
-            );
-          }
+// Delete a task
+void _deleteTask(int index) {
+setState(() {
+_tasks.removeAt(index);
+});
+_saveTasks();
+}
 
-          final todos = snapshot.data!;
-          return ListView.builder(
-            itemCount: todos.length,
-            itemBuilder: (context, index) {
-              final todo = todos[index];
-              return ListTile(
-                leading: Checkbox(
-                  value: todo.isCompleted,
-                  onChanged: null, // Read-only for demo (JSONPlaceholder doesn't support PATCH here)
-                  activeColor: appBarColor,
-                ),
-                title: Text(
-                  todo.title,
-                  style: TextStyle(
-                    color: const Color(0xFFF3EDE3),
-                    decoration: todo.isCompleted ? TextDecoration.lineThrough : null,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => UserProfileScreen(userId: todo.userId),
-                    ),
-                  );
-                },
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
+@override
+void dispose() {
+_taskController.dispose();
+super.dispose();
+}
+
+// Show dialog to add a task
+void _showAddTaskDialog() {
+showDialog(
+context: context,
+builder: (context) {
+return AlertDialog(
+title: Text('Add Task'),
+content: TextField(
+controller: _taskController,
+decoration: InputDecoration(
+labelText: 'Task',
+border: OutlineInputBorder(),
+labelStyle: TextStyle(color: Color(0xFF18442A)),
+),
+),
+actions: [
+TextButton(
+onPressed: () => Navigator.pop(context),
+child: Text('Cancel', style: TextStyle(color: Color(0xFF18442A))),
+),
+TextButton(
+onPressed: () {
+_addTask(_taskController.text);
+Navigator.pop(context);
+},
+child: Text('Add', style: TextStyle(color: Color(0xFF18442A))),
+),
+],
+);
+},
+);
+}
+
+@override
+Widget build(BuildContext context) {
+const appBarColor = Color(0xFF18442A);
+
+return Scaffold(
+appBar: AppBar(
+title: Text('Task Manager', style: TextStyle(color: Color(0xFFF3EDE3))),
+backgroundColor: appBarColor,
+actions: [
+IconButton(
+icon: Icon(Icons.add, color: Color(0xFFF3EDE3)),
+onPressed: _showAddTaskDialog,
+),
+],
+),
+backgroundColor: Color(0xFF45644A),
+body: _tasks.isEmpty
+? Center(
+child: Text(
+'No tasks yet!',
+style: TextStyle(color: Color(0xFFF3EDE3), fontSize: 18),
+),
+)
+    : ListView.builder(
+itemCount: _tasks.length,
+itemBuilder: (context, index) {
+return ListTile(
+leading: Checkbox(
+value: _tasks[index].isCompleted,
+onChanged: (value) => _toggleTask(index),
+activeColor: appBarColor,
+),
+title: Text(
+_tasks[index].title,
+style: TextStyle(
+color: Color(0xFFF3EDE3),
+decoration: _tasks[index].isCompleted
+? TextDecoration.lineThrough
+    : null,
+),
+),
+trailing: IconButton(
+icon: Icon(Icons.delete, color: Color(0xFFF3EDE3)),
+onPressed: () => _deleteTask(index),
+),
+);
+},
+),
+);
+}
 }
